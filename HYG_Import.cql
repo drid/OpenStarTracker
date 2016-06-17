@@ -3,25 +3,27 @@ CREATE CONSTRAINT ON (s:Star) ASSERT s.id IS UNIQUE;
 CREATE CONSTRAINT ON (sp:Spectrum) ASSERT sp.spectrum IS UNIQUE;
 CREATE CONSTRAINT ON (ci:colorIndex) ASSERT ci.index IS UNIQUE;
 
-//Load All Data
+//Load Stars w rel color/spectrum
 USING PERIODIC COMMIT
 LOAD CSV WITH HEADERS FROM
-'file:///HYG-Database/hygxyz-subset.csv' AS line
-WITH line, line.ProperName AS Star,
-CASE line.Spectrum WHEN NULL THEN '_NA' ELSE line.Spectrum END AS Spectrum,
-CASE line.ColorIndex WHEN NULL THEN '_NA' ELSE line.ColorIndex END AS ColorIndex
+'file:///HYG-Database/hygdata_v3.csv' AS line
+WITH line, line.proper AS Star,
+CASE line.spect WHEN NULL THEN '_NA' ELSE line.spect END AS Spectrum,
+CASE line.ci WHEN NULL THEN '_NA' ELSE TOINT(line.ci) END AS ColorIndex,
+CASE line.con WHEN NULL THEN '_NA' ELSE line.con END AS Constellation
 
 CREATE (star: Star {
-  id: TOINT(line.StarID),
-  name: line.ProperName,
-  RA: TOFLOAT(line.RA),
-  RADeg: TOFLOAT(line.RA)*15,
-  Declination: TOFLOAT(line.Dec),
-  Distance: TOFLOAT(line.Distance),
-  Magnitude: TOFLOAT(line.Mag),
-  X: TOFLOAT(line.X),
-  Y: TOFLOAT(line.Y),
-  Z: TOFLOAT(line.Z)
+  id: TOINT(line.id),
+  name: Star,
+  RA: TOFLOAT(line.ra),
+  RADeg: TOFLOAT(line.ra)*15,
+  Declination: TOFLOAT(line.dec),
+  Distance: TOFLOAT(line.dist),
+  Magnitude: TOFLOAT(line.mag),
+  Constellation: Constellation,
+  X: TOFLOAT(line.x),
+  Y: TOFLOAT(line.y),
+  Z: TOFLOAT(line.z)
   })
 
 MERGE (spectrum: Spectrum {spectrum: Spectrum})
@@ -29,6 +31,9 @@ CREATE (spectrum)-[:OF]->(star)
 
 MERGE (colorIndex: ColorIndex {index: ColorIndex})
 CREATE (colorIndex)-[:OF]->(star)
+
+MERGE (constellation: Constellation {name: Constellation})
+CREATE (star)-[:IN]->(constellation)
 ;
 
 //Calulate DRA DDec
