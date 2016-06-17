@@ -20,7 +20,6 @@ CREATE (star: Star {
   Declination: TOFLOAT(line.dec),
   Distance: TOFLOAT(line.dist),
   Magnitude: TOFLOAT(line.mag),
-  Constellation: Constellation,
   X: TOFLOAT(line.x),
   Y: TOFLOAT(line.y),
   Z: TOFLOAT(line.z)
