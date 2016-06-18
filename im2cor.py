@@ -1,9 +1,16 @@
+############################################################################
+# This file is only an example of the star detection procedure that will   #
+# take place                     					   #
+############################################################################
+
 import numpy as np
 import cv2
 
 
-# Load an example image from ISS in grayscale
+# Load an example image from ISS in grayscale 
+# http://spaceflight.nasa.gov/gallery/images/station/crew-6/hires/iss006e40544.jpg
 i = cv2.imread('iss006e40544.jpg',0)
+
 img = i[1:1200, 1:2000] # Do some crop under to remove the iss image code
 
 median1 = cv2.medianBlur(img,5)
@@ -25,3 +32,11 @@ for kp in keypoints:
 
 cv2.imwrite('iss006e40544_circles.png',img)
 
+# compute angular distances 
+
+for kp1 in keypoints:
+	for kp2 in keypoints:
+	 	if kp1!=kp2:
+			x1, y1 = kp1.pt
+			x2, y2 = kp2.pt
+			print x1, y1, str("-"), x2, y2 
