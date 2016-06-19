@@ -5,7 +5,7 @@
 
 import numpy as np
 import cv2
-
+import math
 
 # Load an example image from ISS in grayscale 
 # http://spaceflight.nasa.gov/gallery/images/station/crew-6/hires/iss006e40544.jpg
@@ -27,16 +27,20 @@ keypoints = detector.detect(255-thresh1)
 
 for kp in keypoints:
 	x, y = kp.pt  
-	print (x, y)
+	#print (x, y)
 	cv2.circle(img,(int(x),int(y)),20 , (255,0,255),1 )
 
 cv2.imwrite('iss006e40544_circles.png',img)
 
 # compute angular distances 
-
+# (for geometrical corrected image)
+r = 10 # r is a factor that must be calibrated to the corresponding image
 for kp1 in keypoints:
 	for kp2 in keypoints:
 	 	if kp1!=kp2:
 			x1, y1 = kp1.pt
 			x2, y2 = kp2.pt
-			print x1, y1, str("-"), x2, y2 
+			d = math.sqrt((x1-x2)**2+(y1-y2)**2)
+			phi = 2*math.asin(2*r/d)
+			print kp1.i,kp2.i,phi*180/math.pi # Show results in degrees 
+			#print x1, y1, str("-"), x2, y2 
