@@ -25,22 +25,22 @@ cv2.imwrite('iss006e40544_otsu.png',thresh1)
 detector = cv2.SimpleBlobDetector()
 keypoints = detector.detect(255-thresh1)
 
-for kp in keypoints:
+font = cv2.FONT_HERSHEY_SIMPLEX
+for s,kp in enumerate(keypoints):
 	x, y = kp.pt  
 	#print (x, y)
 	cv2.circle(img,(int(x),int(y)),20 , (255,0,255),1 )
-
+	cv2.putText(img,str(s),(int(x)-22,int(y)-22), font, 0.6,(255,255,255))
 cv2.imwrite('iss006e40544_circles.png',img)
 
 # compute angular distances 
 # (for geometrical corrected image)
-r = 10 # r is a factor that must be calibrated to the corresponding image
-for kp1 in keypoints:
-	for kp2 in keypoints:
-	 	if kp1!=kp2:
+r = 9850  # r is a factor that must be calibrated to the corresponding image
+for s1,kp1 in enumerate(keypoints):
+	for s2,kp2 in enumerate(keypoints):
+	 	if kp1<kp2:
 			x1, y1 = kp1.pt
 			x2, y2 = kp2.pt
 			d = math.sqrt((x1-x2)**2+(y1-y2)**2)
-			phi = 2*math.asin(2*r/d)
-			print kp1.i,kp2.i,phi*180/math.pi # Show results in degrees 
-			#print x1, y1, str("-"), x2, y2 
+			phi = 2*math.asin(2*d/r)
+			print s1,s2,phi*180/math.pi # Show results in degrees 
