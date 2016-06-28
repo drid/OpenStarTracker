@@ -27,7 +27,7 @@ camera.vflip = False
 camera.crop = (0.0, 0.0, 1.0, 1.0)
 #camera.resolution = (1024, 768)
 camera.framerate = Fraction(1, 6)
-camera.shutter_speed = 600000  # 6 sec 
+camera.shutter_speed = 6000000  # 6 sec 
 
 camera.capture('im4.jpg')
 
