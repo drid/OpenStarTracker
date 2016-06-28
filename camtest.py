@@ -8,26 +8,27 @@ from fractions import Fraction
 
 camera = picamera.PiCamera()
 
+camera.opacity = 255
 camera.sharpness = 0
 camera.contrast = 0
 camera.brightness = 50
 camera.saturation = 0
-#camera.video_stabilization = False
+camera.ISO = 1600
+camera.video_stabilization = False
 camera.exposure_compensation = 0
-camera.exposure_mode = 'off'
+camera.exposure_mode = 'night'
+camera.awb_mode = 'off'
+camera.image_effect = 'none'
 camera.meter_mode = 'average'
-camera.awb_mode = 'auto'
-#camera.image_effect = 'none'
-#camera.color_effects = None
-#camera.rotation = 0
-#camera.hflip = False
-#camera.vflip = False
+camera.color_effects = (128,128)
+camera.rotation = 0
+camera.hflip = False
+camera.vflip = False
 camera.crop = (0.0, 0.0, 1.0, 1.0)
-camera.resolution = (1024, 768)
-camera.ISO = 800
+#camera.resolution = (1024, 768)
 camera.framerate = Fraction(1, 6)
-camera.shutter_speed = 6000000  # 6 sec 
+camera.shutter_speed = 600000  # 6 sec 
 
-camera.capture('im1.jpg')
+camera.capture('im4.jpg')
 
 
