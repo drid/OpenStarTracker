@@ -17,7 +17,9 @@ CREATE (star: Star {
   name: Star,
   RA: TOFLOAT(line.ra),
   RADeg: TOFLOAT(line.ra)*15,
+  RARad: TOFLOAT(line.rarad),
   Declination: TOFLOAT(line.dec),
+  DecRad: TOFLOAT(line.decrad),
   Distance: TOFLOAT(line.dist),
   Magnitude: TOFLOAT(line.mag),
   X: TOFLOAT(line.x),
@@ -36,22 +38,23 @@ CREATE (star)-[:IN]->(constellation)
 ;
 
 //Calulate DRA DDec
-MATCH (n:Star)
-  MATCH(ns:Star)
+MATCH (n:Star),(ns:Star)
   WHERE ns.id > n.id
-    AND ABS(n.RADeg-ns.RADeg) < 3
-    AND ABS(n.Declination-ns.Declination) < 3
-    AND n.Magnitude < 6
-    AND ns.Magnitude < 6
-  CREATE (n)-[:DRADEC {
-    DRA: (n.RADeg-ns.RADeg),
-    DDeclination: n.Declination-ns.Declination,
-    DA: acos(sin(n.Declination*pi()/180)*sin(ns.Declination*pi()/180) +
-      cos(n.Declination*pi()/180)*cos(ns.Declination*pi()/180)*cos(n.RADeg*pi()/180 - ns.RADeg*pi()/180))*180/pi()
-    }]->(ns)
-  CREATE (ns)-[:DRADEC {
-    DRA: (n.RADeg-ns.RADeg),
-    DDeclination: n.Declination-ns.Declination,
-    DA: acos(sin(n.Declination*pi()/180)*sin(ns.Declination*pi()/180) +
-      cos(n.Declination*pi()/180)*cos(ns.Declination*pi()/180)*cos(n.RADeg*pi()/180 - ns.RADeg*pi()/180))*180/pi()
-    }]->(n)
+    AND n.Magnitude <= 5
+    AND ns.Magnitude <= 5
+  WITH n,ns,
+    DEGREES(
+      ATAN(
+        (SQRT((cos(ns.DecRad)^2)*(sin(ns.RARad-n.RARad)^2)+
+          (cos(n.DecRad)*sin(ns.DecRad)-sin(n.DecRad)*cos(ns.DecRad)*cos(ns.RARad-n.RARad)))) /
+        (sin(n.DecRad)*sin(ns.DecRad)+cos(n.DecRad)*cos(ns.DecRad)*cos(ns.RARad-n.RARad))
+        )
+      ) AS AngSep
+    WHERE AngSep > 6
+      AND AngSep < 40
+    CREATE (n)-[:DRADEC {
+      AngularSeparation: AngSep
+      }]->(ns)
+    CREATE (ns)-[:DRADEC {
+      AngularSeparation: AngSep
+      }]->(n)
