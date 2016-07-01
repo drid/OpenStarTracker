@@ -38,23 +38,32 @@ CREATE (star)-[:IN]->(constellation)
 ;
 
 //Calulate DRA DDec
-MATCH (n:Star),(ns:Star)
-  WHERE ns.id > n.id
+MATCH (n:Star),(n2:Star)
+  WHERE n2.id > n.id
     AND n.Magnitude <= 5
-    AND ns.Magnitude <= 5
-  WITH n,ns,
+    AND n2.Magnitude <= 5
+  WITH n,n2,
     DEGREES(
       ATAN(
-        (SQRT((cos(ns.DecRad)^2)*(sin(ns.RARad-n.RARad)^2)+
-          (cos(n.DecRad)*sin(ns.DecRad)-sin(n.DecRad)*cos(ns.DecRad)*cos(ns.RARad-n.RARad)))) /
-        (sin(n.DecRad)*sin(ns.DecRad)+cos(n.DecRad)*cos(ns.DecRad)*cos(ns.RARad-n.RARad))
+        (SQRT((cos(n2.DecRad)^2)*(sin(n2.RARad-n.RARad)^2)+
+          (cos(n.DecRad)*sin(n2.DecRad)-sin(n.DecRad)*cos(n2.DecRad)*cos(n2.RARad-n.RARad))^2)) /
+        (sin(n.DecRad)*sin(n2.DecRad)+cos(n.DecRad)*cos(n2.DecRad)*cos(n2.RARad-n.RARad))
         )
       ) AS AngSep
     WHERE AngSep > 6
       AND AngSep < 40
     CREATE (n)-[:DRADEC {
       AngularSeparation: AngSep
-      }]->(ns)
-    CREATE (ns)-[:DRADEC {
+      }]->(n2)
+    CREATE (n2)-[:DRADEC {
       AngularSeparation: AngSep
       }]->(n)
+
+// Spample query for UMa
+// Relation match ABS no param
+MATCH p=()-[r:DRADEC]->()-[r2:DRADEC]->()-[r3:DRADEC]->() -[r4:DRADEC]->()
+WHERE ABS(r.AngularSeparation - 25.7) < .046 //1-7
+  AND ABS(r2.AngularSeparation - 10.2) < .046 //7-4
+  AND ABS(r3.AngularSeparation - 10.1) < .046 //4-6
+  AND ABS(r4.AngularSeparation - 15.5) < .046 //6-3
+RETURN p LIMIT 30
