@@ -17,7 +17,9 @@ CREATE (star: Star {
   name: Star,
   RA: TOFLOAT(line.ra),
   RADeg: TOFLOAT(line.ra)*15,
+  RARad: TOFLOAT(line.rarad),
   Declination: TOFLOAT(line.dec),
+  DecRad: TOFLOAT(line.decrad),
   Distance: TOFLOAT(line.dist),
   Magnitude: TOFLOAT(line.mag),
   X: TOFLOAT(line.x),
@@ -36,22 +38,32 @@ CREATE (star)-[:IN]->(constellation)
 ;
 
 //Calulate DRA DDec
-MATCH (n:Star)
-  MATCH(ns:Star)
-  WHERE ns.id > n.id
-    AND ABS(n.RADeg-ns.RADeg) < 3
-    AND ABS(n.Declination-ns.Declination) < 3
-    AND n.Magnitude < 6
-    AND ns.Magnitude < 6
-  CREATE (n)-[:DRADEC {
-    DRA: (n.RADeg-ns.RADeg),
-    DDeclination: n.Declination-ns.Declination,
-    DA: acos(sin(n.Declination*pi()/180)*sin(ns.Declination*pi()/180) +
-      cos(n.Declination*pi()/180)*cos(ns.Declination*pi()/180)*cos(n.RADeg*pi()/180 - ns.RADeg*pi()/180))*180/pi()
-    }]->(ns)
-  CREATE (ns)-[:DRADEC {
-    DRA: (n.RADeg-ns.RADeg),
-    DDeclination: n.Declination-ns.Declination,
-    DA: acos(sin(n.Declination*pi()/180)*sin(ns.Declination*pi()/180) +
-      cos(n.Declination*pi()/180)*cos(ns.Declination*pi()/180)*cos(n.RADeg*pi()/180 - ns.RADeg*pi()/180))*180/pi()
-    }]->(n)
+MATCH (n:Star),(n2:Star)
+  WHERE n2.id > n.id
+    AND n.Magnitude <= 5
+    AND n2.Magnitude <= 5
+  WITH n,n2,
+    DEGREES(
+      ATAN(
+        (SQRT((cos(n2.DecRad)^2)*(sin(n2.RARad-n.RARad)^2)+
+          (cos(n.DecRad)*sin(n2.DecRad)-sin(n.DecRad)*cos(n2.DecRad)*cos(n2.RARad-n.RARad))^2)) /
+        (sin(n.DecRad)*sin(n2.DecRad)+cos(n.DecRad)*cos(n2.DecRad)*cos(n2.RARad-n.RARad))
+        )
+      ) AS AngSep
+    WHERE AngSep > 6
+      AND AngSep < 40
+    CREATE (n)-[:DRADEC {
+      AngularSeparation: AngSep
+      }]->(n2)
+    CREATE (n2)-[:DRADEC {
+      AngularSeparation: AngSep
+      }]->(n)
+
+// Spample query for UMa
+// Relation match ABS no param
+MATCH p=()-[r:DRADEC]->()-[r2:DRADEC]->()-[r3:DRADEC]->() -[r4:DRADEC]->()
+WHERE ABS(r.AngularSeparation - 25.7) < .046 //1-7
+  AND ABS(r2.AngularSeparation - 10.2) < .046 //7-4
+  AND ABS(r3.AngularSeparation - 10.1) < .046 //4-6
+  AND ABS(r4.AngularSeparation - 15.5) < .046 //6-3
+RETURN p LIMIT 30
