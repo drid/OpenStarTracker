@@ -4,6 +4,7 @@ import numpy as np
 def angularSeparation(keypoint1, keypoint2, r):
   x1, y1 = keypoint1.pt
   x2, y2 = keypoint2.pt
+  print "\ndX:",x1-x2,"dY:",y1-y2
   d = math.sqrt((x1-x2)**2+(y1-y2)**2)
   return math.degrees(2*math.asin(2*d/r))
 
@@ -35,7 +36,6 @@ def query(pairs, pixelRes):
   query=match+" "+where+"\nRETURN p LIMIT 20"
   return query
 
-  
 # This python function based on a BASIC program Written by Jordan d. Marche
 # and explained by him in Sky & Telescope for July, 1990, page 71.
 # Source: http://www.skyandtelescope.com/wp-content/uploads/marche.bas
@@ -48,7 +48,7 @@ def coordinates(xt, yt, a, d, x, y):
 	dr = math.pi/180
 	L = 0.030 # camera focal length
 	N = 4 # number of stars, must be >=4
-	a0 = np.mean(a) # R.a. of plate center approx. 
+	a0 = np.mean(a) # R.a. of plate center approx.
 	d0 = np.mean(d)	# dec. of plate center approx.
 	sd = math.sin(d0)
 	cd = math.cos(d0)
@@ -68,7 +68,7 @@ def coordinates(xt, yt, a, d, x, y):
 	r9 = 0
 	xs = 0
 	ys = 0
-	r =  [[0 for i in range(9)] for j in range(N)] 
+	r =  [[0 for i in range(9)] for j in range(N)]
 	for star in range(4):
 		xs = xs + x[star]
 		ys = ys + y[star]
@@ -84,7 +84,7 @@ def coordinates(xt, yt, a, d, x, y):
 		r8 = r8 + r[star][7]
 		r[star][8] = r[star][6]*y[star]
 		r9 = r9 + r[star][8]
-		
+
 	# Now solve for d, E, f, by cramer's Rule
 	dd = r1*(r2*N-ys*ys)-r3*(r3*N-xs*ys)+xs*(r3*ys-xs*r2)
 	d = r8*(r2*N-ys*ys)-r3*(r9*N-r7*ys)+xs*(r9*ys-r7*r2)
@@ -92,12 +92,12 @@ def coordinates(xt, yt, a, d, x, y):
 	f = r1*(r2*r7-ys*r9)-r3*(r3*r7-xs*r9)+r8*(r3*ys-xs*r2)
 	d = d/dd
 	e = e/dd
-	f = f/dd	
+	f = f/dd
 	#
 	r4=0
 	r5=0
 	r6=0
-	
+
 	for star in range(N):
 		r[star][3] = x1[star]-x[star]/L
 		r4=r4+r[star][3]
@@ -113,7 +113,7 @@ def coordinates(xt, yt, a, d, x, y):
 	a = a/dd
 	b = b/dd
 	c = c/dd
-		
+
 	# Now fINd RESIdUaLS
 	As = 0
 	Ds = 0
@@ -124,16 +124,16 @@ def coordinates(xt, yt, a, d, x, y):
 		rd[star] = y[star]-L*(y1[star]-(d*x[star]+e*y[star]+f))
 		As = As + ((ra[star]/L)*3600/(dr*15*math.cos(d0)))**2
 		Ds = Ds + ((rd[star]/L)*3600/dr)**2
-	
+
 	s1 = math.sqrt(As/(N-3))
 	s2 = math.sqrt(Ds/(N-3))
-	
+
 	# find standard coordinates of target
 	xx = a*xt + b*yt + c + xt/L
 	yy = d*xt + e*yt + f + yt/L
 	b = cd - yy*sd
 	g = math.sqrt(xx*xx + b*b)
-	
+
 	#   find right ascension of target
 	a5 = math.atan(xx/b)
 	if b<0:
@@ -144,8 +144,14 @@ def coordinates(xt, yt, a, d, x, y):
 	if a6<0:
 		a6 = a6 + 2*math.pi
 	at = a6/(dr*15)
-	
+
 	# find declination of target
 	d6 = math.atan((sd + yy*cd)/g)
 	dt = d6/dr
-	return [at, dt]	
+	return [at, dt]
+
+def imgGetAngles (img, hfov, vfov):
+  rows,cols=img.shape
+  imgAngles=[("rows",rows), ("cols",cols)]
+  print "Rows: "+str(rows)+" Cols: "+str(cols)+"\n"
+  return imgAngles
