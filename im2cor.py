@@ -38,5 +38,5 @@ for s,kp in enumerate(keypoints):
 	cv2.putText(img,str(s),(int(x)-22,int(y)-22), font, 0.6,(255,255,255))
 cv2.imwrite('images/'+filename+'_circles.png',img)
 
-pairs=startracker_lib.create_pairs(keypoints, 6, 35, 9850)
+pairs=startracker_lib.create_pairs(keypoints, 6, 35, 8745.1)
 print startracker_lib.query(pairs, 0.046)
