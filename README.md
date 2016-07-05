@@ -1,9 +1,21 @@
 # OpenStarTracker
 
-File description:
+## Prerequisites
 
-HYG_Import.cql
-* Cypher (neo4j) script for importing HYG data into Neo4j
+* Neo4J
+* OpenCV 
+* Python for OpenCV
 
-im2cor.py
-* script for detection using test image
+##File description
+
+**HYG_Import.cql**
+
+Cypher (neo4j) script for importing HYG data into Neo4j
+
+**im2cor.py**
+
+script for detection using test image
+
+**im2cor_rpicam.py**
+
+script for detection using pi camera
