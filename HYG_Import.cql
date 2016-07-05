@@ -3,7 +3,7 @@ CREATE CONSTRAINT ON (s:Star) ASSERT s.id IS UNIQUE;
 CREATE CONSTRAINT ON (sp:Spectrum) ASSERT sp.spectrum IS UNIQUE;
 CREATE CONSTRAINT ON (ci:colorIndex) ASSERT ci.index IS UNIQUE;
 
-//Load Stars w rel color/spectrum
+//Load Stars with relations for color,spectrum and constellation
 USING PERIODIC COMMIT
 LOAD CSV WITH HEADERS FROM
 'file:///HYG-Database/hygdata_v3.csv' AS line
@@ -37,7 +37,7 @@ MERGE (constellation: Constellation {name: Constellation})
 CREATE (star)-[:IN]->(constellation)
 ;
 
-//Calulate DRA DDec
+//Calulate Angular separation and create relations for AS 6°-35° and magnitude < 5
 MATCH (n:Star),(n2:Star)
   WHERE n2.id > n.id
     AND n.Magnitude <= 5
@@ -51,7 +51,7 @@ MATCH (n:Star),(n2:Star)
         )
       ) AS AngSep
     WHERE AngSep > 6
-      AND AngSep < 40
+      AND AngSep < 35
     CREATE (n)-[:DRADEC {
       AngularSeparation: AngSep
       }]->(n2)
@@ -59,8 +59,10 @@ MATCH (n:Star),(n2:Star)
       AngularSeparation: AngSep
       }]->(n)
 
-// Spample query for UMa
+// Sample query for UMa
 // Relation match ABS no param
+// Data from http://www.skythisweek.info/benchmarks.pdf
+
 MATCH p=()-[r:DRADEC]->()-[r2:DRADEC]->()-[r3:DRADEC]->() -[r4:DRADEC]->()
 WHERE ABS(r.AngularSeparation - 25.7) < .046 //1-7
   AND ABS(r2.AngularSeparation - 10.2) < .046 //7-4
