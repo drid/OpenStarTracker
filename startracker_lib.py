@@ -1,22 +1,53 @@
-import math
+from math import sqrt,atan,cos,sin,degrees,atan2,asin, acos
 import numpy as np
 
-def angularSeparation(keypoint1, keypoint2, r):
+def angularSeparation(keypoint1, keypoint2, imageProperties):
   x1, y1 = keypoint1.pt
+  # print "Center XY",imageProperties.xy2center(x1,y1)
+  ff,y1=imageProperties.xy2center(x1,y1)
   x2, y2 = keypoint2.pt
-  print "\ndX:",x1-x2,"dY:",y1-y2
-  d = math.sqrt((x1-x2)**2+(y1-y2)**2)
-  return math.degrees(2*math.asin(2*d/r))
+  ff,y2=imageProperties.xy2center(x2,y2)
+
+  a1=x1*imageProperties.pixelXPhi
+  a2=x2*imageProperties.pixelXPhi
+  # d1=(imageProperties.rows-y1)*imageProperties.pixelYPhi
+  # d2=(imageProperties.rows-y2)*imageProperties.pixelYPhi
+  d1=y1*imageProperties.pixelYPhi
+  d2=y2*imageProperties.pixelYPhi
+  # print d1,d2,a1,a2
+  dX=abs(x1-x2)
+  dY=abs(y1-y2)
+  # print "\ndX:",dX,"dY:",dY
+
+  dXPhi=dX*imageProperties.pixelXPhi
+  dYPhi=dY*imageProperties.pixelYPhi
+  # print "DXPhi/DYPhi:",dXPhi,dYPhi
+
+  # result = degrees(
+  #     atan(
+  #       (sqrt((cos(d2)**2)*(sin(dXPhi)**2)+
+  #         (cos(d1)*sin(d2)-sin(d1)*cos(d2)*cos(dXPhi))**2)) /
+  #       (sin(d1)*sin(d2)+cos(d1)*cos(d2)*cos(dXPhi))
+  #       )
+  #     )
+  # result = degrees(acos(sin(d1)*sin(d2)+cos(d1)*cos(d2)*cos(dXPhi)))
+
+  result = 2*sqrt((dXPhi)**2+(dYPhi)**2)
+  print "AS:",result
+  return result
+
+  # d = sqrt((x1-x2)**2+(y1-y2)**2)
+  # return degrees(2*asin(2*d/r))
 
 # compute angular distances
 # (for geometrical corrected image)
 # r is a factor that must be calibrated to the corresponding image
-def create_pairs(keypoints, minAS, maxAS, r):
+def create_pairs(keypoints, minAS, maxAS, imageProperties):
   pairs = []
   idx=0
   for cntr in range(0, len(keypoints)-1):
     for idx2 in range(idx+1, len(keypoints)):
-      phi =angularSeparation(keypoints[idx], keypoints[idx2], r)
+      phi =angularSeparation(keypoints[idx], keypoints[idx2], imageProperties)
       if (phi > minAS) & (phi < maxAS):
         pairs.append((idx,idx2,phi))
         print idx,idx2,phi
@@ -150,8 +181,19 @@ def coordinates(xt, yt, a, d, x, y):
 	dt = d6/dr
 	return [at, dt]
 
-def imgGetAngles (img, hfov, vfov):
-  rows,cols=img.shape
-  imgAngles=[("rows",rows), ("cols",cols)]
-  print "Rows: "+str(rows)+" Cols: "+str(cols)+"\n"
-  return imgAngles
+class imageProperties:
+  def __init__(self, rows, cols, hfov, vfov):
+    self.rows=rows
+    self.cols=cols
+    self.aspect=float(cols)/float(rows)
+    self.pixelXPhi = float(hfov)/cols
+    self.pixelYPhi = float(vfov)/rows
+    self.center = (cols/2, rows/2)
+  def __str__(self):
+        return "rows: %d\ncols: %d\naspect:%f\nPixel X Phi: %f\nPixel Y Phi:%f\nCenter:%d,%d" % (
+          self.rows, self.cols, self.aspect,self.pixelXPhi, self.pixelYPhi,
+          self.center[0],self.center[1])
+  def xy2center(self,x,y):
+    return (x-self.center[0],self.rows-y-self.center[1])
+  def getError(self):
+    return max(self.pixelYPhi, self.pixelXPhi)

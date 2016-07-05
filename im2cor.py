@@ -24,7 +24,7 @@ median2 = cv2.medianBlur(median1,5)
 cv2.imwrite('output/'+filename+'_median2.png',median2)
 
 ret,thresh1 = cv2.threshold(median2,110,255,cv2.THRESH_BINARY)
-cv2.imwrite('output'+filename+'_otsu.png',thresh1)
+cv2.imwrite('output/'+filename+'_otsu.png',thresh1)
 
 # Setup SimpleBlobDetector parameters.
 params = cv2.SimpleBlobDetector_Params()
@@ -46,6 +46,8 @@ for s,kp in enumerate(keypoints):
 cv2.imwrite('output/'+filename+'_circles.png',img)
 
 
-print startracker_lib.imgGetAngles(img, 30, 40)
-pairs=startracker_lib.create_pairs(keypoints, 6, 35, 8745.1)
-print startracker_lib.query(pairs, 0.046)
+rows,cols=img.shape
+imgProperties=startracker_lib.imageProperties(rows,cols,30,30)
+print imgProperties
+pairs=startracker_lib.create_pairs(keypoints, 6, 35, imgProperties)
+print startracker_lib.query(pairs, imgProperties.getError())

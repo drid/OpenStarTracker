@@ -51,7 +51,7 @@ MATCH (n:Star),(n2:Star)
         )
       ) AS AngSep
     WHERE AngSep > 6
-      AND AngSep < 40
+      AND AngSep < 35
     CREATE (n)-[:DRADEC {
       AngularSeparation: AngSep
       }]->(n2)
@@ -59,8 +59,10 @@ MATCH (n:Star),(n2:Star)
       AngularSeparation: AngSep
       }]->(n)
 
-// Spample query for UMa
+// Sample query for UMa
 // Relation match ABS no param
+// Data from http://www.skythisweek.info/benchmarks.pdf
+
 MATCH p=()-[r:DRADEC]->()-[r2:DRADEC]->()-[r3:DRADEC]->() -[r4:DRADEC]->()
 WHERE ABS(r.AngularSeparation - 25.7) < .046 //1-7
   AND ABS(r2.AngularSeparation - 10.2) < .046 //7-4
